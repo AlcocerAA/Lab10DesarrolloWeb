@@ -8,9 +8,27 @@ type Product = {
   description: string;
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductsPage() {
-  const res = await fetch("https://fakestoreapi.com/products");
-  const products: Product[] = await res.json();
+  const res = await fetch("https://fakestoreapi.com/products", {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("Error obteniendo productos");
+  }
+
+  const text = await res.text();
+
+  let products: Product[];
+
+  try {
+    products = JSON.parse(text);
+  } catch (error) {
+    console.error("Respuesta inválida:", text);
+    throw new Error("La API no devolvió JSON válido");
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 py-12 px-6">
@@ -19,8 +37,10 @@ export default async function ProductsPage() {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Nuestros Productos
           </h1>
+
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explora nuestra seleccionada colección de productos de calidad con detalles y precios competitivos.
+            Explora nuestra seleccionada colección de productos de calidad con
+            detalles y precios competitivos.
           </p>
         </div>
 
@@ -40,15 +60,19 @@ export default async function ProductsPage() {
                     alt={product.title}
                     className="h-full w-full object-contain p-4 group-hover:scale-110 transition-transform duration-300"
                   />
+
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
+
                 <div className="p-4 flex flex-col flex-grow">
                   <h2 className="text-sm font-semibold text-gray-800 line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {product.title}
                   </h2>
+
                   <p className="mt-2 text-lg font-bold text-gray-900">
                     ${product.price.toFixed(2)}
                   </p>
+
                   <div className="mt-auto pt-4">
                     <span className="inline-block text-sm text-blue-600 font-semibold group-hover:text-blue-700 transition-colors">
                       Ver detalles →
